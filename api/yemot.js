@@ -94,11 +94,11 @@ function formatMenu(text = "ברוכים הבאים לעדכוני בחירות.
   // Accept only the three menu keys: 0, 1, 2.
   return "read=t-" + cleanSpeech(
     text + " להקראת המבזקים האחרונים הקישו אחת. לשמיעת מקורות החדשות הקישו שתיים. לחזרה לשלוחה הקודמת הקישו אפס."
-  ) + "=CHOICE,,1,1,7,Digits,no,no,,012,1,Ok";
+  ) + "=wm_nav,,1,1,7,Digits,no,no,,,1,Ok";
 }
 
 export default async function handler(req, res) {
-  res.setHeader("Cache-Control", "s-maxage=120, stale-while-revalidate=300");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
 
   const query = req.query || {};
   const action = String(query.action || "").toLowerCase();
-  const choice = String(query.CHOICE ?? query.choice ?? query.Digits ?? query.digits ?? "").trim();
+  const choice = String(query.wm_nav ?? query.WM_NAV ?? query.CHOICE ?? query.choice ?? query.Digits ?? query.digits ?? "").trim();
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
   // The read prompt sends the next key back to this endpoint as CHOICE.
