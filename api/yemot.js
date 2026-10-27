@@ -89,7 +89,7 @@ export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).send(formatRead("השירות תומך בבקשת GET בלבד"));
 
   const query = req.query || {};
-  const action = String(query.action || "menu").toLowerCase();
+  const action = String(query.action || "latest").toLowerCase();
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
   if (action === "sources") {
