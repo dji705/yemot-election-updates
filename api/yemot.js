@@ -84,9 +84,11 @@ function formatRead(text) {
 }
 
 function formatMenu(text = "ברוכים הבאים לעדכוני בחירות.") {
+  // Yemot API read grammar: read=<spoken text>=<parameter>,<reuse>,<max>,<min>,<timeout>,<input mode>,...
+  // Accept only the three menu keys: 0, 1, 2.
   return "read=t-" + cleanSpeech(
-    text + " להקראת המבזקים האחרונים הקישו אחת. לשמיעת מקורות החדשות הקישו שתיים. לסיום הקישו אפס."
-  ) + "=action,,1,1,Digits,yes";
+    text + " להקראת המבזקים האחרונים הקישו אחת. לשמיעת מקורות החדשות הקישו שתיים. לחזרה לשלוחה הקודמת הקישו אפס."
+  ) + "=CHOICE,,1,1,7,Digits,no,no,,012,1,Ok";
 }
 
 export default async function handler(req, res) {
@@ -99,23 +101,28 @@ export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).send(formatRead("השירות תומך בבקשת GET בלבד"));
 
   const query = req.query || {};
-  const action = String(query.action || "menu").toLowerCase();
+  const action = String(query.action || "").toLowerCase();
+  const choice = String(query.CHOICE ?? query.choice ?? query.Digits ?? query.digits ?? "").trim();
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
-  if (action === "0" || action === "exit" || action === "hangup") {
-    return res.status(200).send(formatRead("תודה שהאזנתם לעדכוני הבחירות. להתראות."));
+  // The read prompt sends the next key back to this endpoint as CHOICE.
+  if (choice === "0" || action === "0" || action === "exit" || action === "hangup") {
+    return res.status(200).send("go_to_folder=/7");
   }
 
-  if (action === "2" || action === "sources") {
-    const sourcesText = "מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום. מידע רשמי ניתן למצוא באתר ועדת הבחירות המרכזית.";
+  if (choice === "2" || action === "2" || action === "sources") {
+    const sourcesText = "מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום.";
     return res.status(200).send(formatMenu(sourcesText));
   }
 
-  if (action !== "1" && action !== "latest" && action !== "list" && action !== "json" && action !== "item" && action !== "menu") {
+  const wantsLatest = choice === "1" || action === "1" || action === "latest" || action === "list";
+  const isMenuRequest = !choice && !action;
+
+  if (!wantsLatest && !isMenuRequest && action !== "json" && action !== "item") {
     return res.status(200).send(formatMenu("לא זוהתה בחירה."));
   }
 
-  if (action === "menu") {
+  if (isMenuRequest) {
     return res.status(200).send(formatMenu());
   }
 
@@ -145,8 +152,8 @@ export default async function handler(req, res) {
     });
   }
 
-  if (action === "1" || action === "latest" || action === "list") {
-    if (!items.length) return res.status(200).send(formatMenu("לא נמצאו כרגע עדכוני בחירות זמינים. נסו שוב מאוחר יותר."));
+  if (wantsLatest || action === "latest" || action === "list") {
+    if (!items.length) return res.status(200).send(formatMenu("לא נמצאו כרגע מבזקי בחירות זמינים. נסו שוב מאוחר יותר."));
     const output = items.map((item, i) => "עדכון " + (i + 1) + ". " + item.title + ". מקור: " + item.source + ".").join(" ");
     return res.status(200).send(formatMenu(output));
   }
