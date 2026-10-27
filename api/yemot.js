@@ -122,7 +122,9 @@ export default async function handler(req, res) {
   }
 
   const wantsLatest = choice === "1" || action === "1" || action === "latest" || action === "list";
-  const isMenuRequest = !choice && !action;
+  // Yemot adds automatic call metadata to the first request; those fields are not a keypad choice.
+  // Treat any request without a recognized action or CHOICE value as the initial menu.
+  const isMenuRequest = !choice && !["json", "item", "latest", "list", "sources"].includes(action);
 
   if (!wantsLatest && !isMenuRequest && action !== "json" && action !== "item") {
     return res.status(200).send(formatMenu("לא זוהתה בחירה."));
