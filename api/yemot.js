@@ -75,8 +75,18 @@ function isElectionRelated(item) {
   return /בחירות|ועדת הבחירות|קלפי|קלפיות|מפלגה|מפלגות|קמפיין|סקרים|מנדטים|הצבעה|בוחר|בוחרים|רשימה לכנסת|כנסת|ראש הממשלה|בחירות מקומיות/.test(text);
 }
 
+function cleanSpeech(text) {
+  return String(text || "").replace(/[\r\n]/g, " ").replace(/#/g, "").replace(/\s+/g, " ").trim();
+}
+
 function formatRead(text) {
-  return "read=" + String(text || "").replace(/[\r\n]/g, " ").replace(/#/g, "") + ".";
+  return "read=t-" + cleanSpeech(text);
+}
+
+function formatMenu(text = "ברוכים הבאים לעדכוני בחירות.") {
+  return "read=t-" + cleanSpeech(
+    text + " להקראת המבזקים האחרונים הקישו אחת. לשמיעת מקורות החדשות הקישו שתיים. לסיום הקישו אפס."
+  ) + "=action,,1,1,Digits,yes";
 }
 
 export default async function handler(req, res) {
@@ -89,11 +99,24 @@ export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).send(formatRead("השירות תומך בבקשת GET בלבד"));
 
   const query = req.query || {};
-  const action = String(query.action || "latest").toLowerCase();
+  const action = String(query.action || "menu").toLowerCase();
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
-  if (action === "sources") {
-    return res.status(200).send(formatRead("מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום. מידע רשמי ניתן למצוא באתר ועדת הבחירות המרכזית. להקראת העדכונים הקישו אחת."));
+  if (action === "0" || action === "exit" || action === "hangup") {
+    return res.status(200).send(formatRead("תודה שהאזנתם לעדכוני הבחירות. להתראות."));
+  }
+
+  if (action === "2" || action === "sources") {
+    const sourcesText = "מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום. מידע רשמי ניתן למצוא באתר ועדת הבחירות המרכזית.";
+    return res.status(200).send(formatMenu(sourcesText));
+  }
+
+  if (action !== "1" && action !== "latest" && action !== "list" && action !== "json" && action !== "item" && action !== "menu") {
+    return res.status(200).send(formatMenu("לא זוהתה בחירה."));
+  }
+
+  if (action === "menu") {
+    return res.status(200).send(formatMenu());
   }
 
   const feeds = await Promise.all(SOURCES.map(getFeed));
@@ -125,15 +148,15 @@ export default async function handler(req, res) {
   if (action === "latest" || action === "list") {
     if (!items.length) return res.status(200).send(formatRead("לא נמצאו כרגע עדכוני בחירות זמינים. נסו שוב מאוחר יותר."));
     const output = items.map((item, i) => "עדכון " + (i + 1) + ". " + item.title + ". מקור: " + item.source + ".").join(" ");
-    return res.status(200).send(formatRead(output));
+    return res.status(200).send(formatMenu(output));
   }
 
   if (action === "item") {
     const index = Math.max(1, Number.parseInt(query.n || "1", 10) || 1) - 1;
     const item = items[index];
     if (!item) return res.status(200).send(formatRead("העדכון המבוקש לא נמצא."));
-    return res.status(200).send(formatRead(item.title + ". מקור: " + item.source + ". " + (item.description || "")));
+    return res.status(200).send(formatMenu(item.title + ". מקור: " + item.source + ". " + (item.description || "")));
   }
 
-  return res.status(200).send(formatRead("ברוכים הבאים לעדכוני בחירות. להקראת העדכונים האחרונים הקישו אחת. למידע על המקורות הקישו שתיים."));
+  return res.status(200).send(formatMenu());
 }
