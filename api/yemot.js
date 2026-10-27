@@ -1,7 +1,12 @@
 const SOURCES = [
-  { name: "ynet", url: "https://www.ynet.co.il/Integration/StoryRss2.xml" },
+  { name: "ynet מבזקים", url: "https://www.ynet.co.il/Integration/StoryRss1854.xml" },
+  { name: "ynet חדשות", url: "https://www.ynet.co.il/Integration/StoryRss2.xml" },
   { name: "כאן חדשות", url: "https://www.kan.org.il/rss/" },
   { name: "כל רגע", url: "https://www.kore.co.il/feed" },
+  { name: "וואלה", url: "https://rss.walla.co.il/feed/22" },
+  { name: "סרוגים", url: "https://www.srugim.co.il/feed" },
+  { name: "מעריב מבזקים", url: "https://www.maariv.co.il/Rss/RssFeedsMivzakiChadashot" },
+  { name: "ישראל היום", url: "https://www.israelhayom.co.il/rss" },
   { name: "ועדת הבחירות המרכזית", url: "https://www.bechirot.gov.il/" }
 ];
 
@@ -88,7 +93,7 @@ export default async function handler(req, res) {
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
   if (action === "sources") {
-    return res.status(200).send(formatRead("מקורות החדשות הם ynet, כאן חדשות וכל רגע. מידע רשמי ניתן למצוא באתר ועדת הבחירות המרכזית. להקראת העדכונים הקישו אחת."));
+    return res.status(200).send(formatRead("מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום. מידע רשמי ניתן למצוא באתר ועדת הבחירות המרכזית. להקראת העדכונים הקישו אחת."));
   }
 
   const feeds = await Promise.all(SOURCES.map(getFeed));
