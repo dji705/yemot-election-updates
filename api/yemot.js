@@ -107,7 +107,7 @@ export default async function handler(req, res) {
 
   // The read prompt sends the next key back to this endpoint as CHOICE.
   if (choice === "0" || action === "0" || action === "exit" || action === "hangup") {
-    return res.status(200).send("go_to_folder=/7");
+    return res.status(200).send("go_to_folder=/8");
   }
 
   if (choice === "2" || action === "2" || action === "sources") {
