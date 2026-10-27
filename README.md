@@ -28,6 +28,6 @@ Replace `YOUR-PROJECT` with the Vercel deployment name. Verify the response form
 
 ## Sources and limitations
 
-The source list is in `api/yemot.js`, including ynet, כאן חדשות, and כל רגע (`https://www.kore.co.il/feed`). RSS feed formats and availability can change. A source that fails to respond is skipped so the API can still return headlines from other sources. The API filters RSS headlines by election-related Hebrew keywords; this can miss relevant articles or include unrelated ones. The official Central Elections Committee website is listed for reference but is not scraped as a feed.
+The source list is in `api/yemot.js`: ynet breaking news and general news, כאן חדשות, כל רגע (`https://www.kore.co.il/feed`), וואלה, סרוגים, מעריב, and ישראל היום. RSS feed formats and availability can change. A source that fails to respond is skipped so the API can still return headlines from other sources. The API filters RSS headlines by election-related Hebrew keywords; this can miss relevant articles or include unrelated ones. The official Central Elections Committee website is listed for reference but is not scraped as a feed.
 
 This is a headline reader, not an official election-results service. Verify official results and announcements at the Central Elections Committee website.
