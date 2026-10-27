@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/yemot.js": {
+      "maxDuration": 10
+    }
+  }
+}
