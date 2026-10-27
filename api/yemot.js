@@ -145,8 +145,8 @@ export default async function handler(req, res) {
     });
   }
 
-  if (action === "latest" || action === "list") {
-    if (!items.length) return res.status(200).send(formatRead("לא נמצאו כרגע עדכוני בחירות זמינים. נסו שוב מאוחר יותר."));
+  if (action === "1" || action === "latest" || action === "list") {
+    if (!items.length) return res.status(200).send(formatMenu("לא נמצאו כרגע עדכוני בחירות זמינים. נסו שוב מאוחר יותר."));
     const output = items.map((item, i) => "עדכון " + (i + 1) + ". " + item.title + ". מקור: " + item.source + ".").join(" ");
     return res.status(200).send(formatMenu(output));
   }
