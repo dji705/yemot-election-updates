@@ -4,10 +4,13 @@ const SOURCES = [
   { name: "כאן חדשות", url: "https://www.kan.org.il/rss/" },
   { name: "כל רגע", url: "https://www.kore.co.il/feed" },
   { name: "וואלה", url: "https://rss.walla.co.il/feed/22" },
+  { name: "וואלה פוליטיקה", url: "https://www.walla.co.il/rss/feed/news/politics" },
+  { name: "וואלה מבזקים", url: "https://www.walla.co.il/rss/feed/news/breaking-news" },
   { name: "סרוגים", url: "https://www.srugim.co.il/feed" },
   { name: "מעריב מבזקים", url: "https://www.maariv.co.il/Rss/RssFeedsMivzakiChadashot" },
   { name: "ישראל היום", url: "https://www.israelhayom.co.il/rss" },
-  { name: "ועדת הבחירות המרכזית", url: "https://www.bechirot.gov.il/" }
+  { name: "Google News בחירות", url: "https://news.google.com/rss/search?q=%D7%91%D7%97%D7%99%D7%A8%D7%95%D7%AA+OR+%D7%A1%D7%A7%D7%A8%D7%99%D7%9D+OR+%D7%9E%D7%A0%D7%93%D7%98%D7%99%D7%9D&hl=he&gl=IL&ceid=IL:he" },
+  { name: "Jerusalem Post בחירות 2026", url: "https://www.jpost.com/rss/rssfeedisraelelection2026" }
 ];
 
 const MAX_ITEMS = 30;
@@ -33,12 +36,16 @@ function tag(item, name) {
 
 function parseRss(xml, source) {
   const items = [];
-  const chunks = xml.match(/<item(?:\s[^>]*)?>[\s\S]*?<\/item>/gi) || [];
+  const chunks = [
+    ...(xml.match(/<item(?:\s[^>]*)?>[\s\S]*?<\/item>/gi) || []),
+    ...(xml.match(/<entry(?:\s[^>]*)?>[\s\S]*?<\/entry>/gi) || [])
+  ];
   for (const chunk of chunks) {
     const title = tag(chunk, "title");
-    const link = tag(chunk, "link");
-    const pubDate = tag(chunk, "pubDate") || tag(chunk, "dc:date");
-    const description = tag(chunk, "description");
+    const atomLink = chunk.match(/<link\b[^>]*href=["']([^"']+)["'][^>]*\/?\s*>/i);
+    const link = tag(chunk, "link") || (atomLink ? decodeXml(atomLink[1]) : "");
+    const pubDate = tag(chunk, "pubDate") || tag(chunk, "dc:date") || tag(chunk, "published") || tag(chunk, "updated");
+    const description = tag(chunk, "description") || tag(chunk, "summary") || tag(chunk, "content");
     if (!title || !link || !/^https?:\/\//i.test(link)) continue;
     items.push({
       title: title.slice(0, 240),
@@ -52,7 +59,6 @@ function parseRss(xml, source) {
 }
 
 async function getFeed(source) {
-  if (source.name === "ועדת הבחירות המרכזית") return [];
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
@@ -72,7 +78,7 @@ async function getFeed(source) {
 
 function isElectionRelated(item) {
   const text = (item.title + " " + item.description).toLowerCase();
-  return /בחירות|ועדת הבחירות|קלפי|קלפיות|מפלגה|מפלגות|קמפיין|סקרים|מנדטים|הצבעה|בוחר|בוחרים|רשימה לכנסת|כנסת|ראש הממשלה|בחירות מקומיות/.test(text);
+  return /בחירות|ועדת הבחירות|קלפי|קלפיות|מפלגה|מפלגות|קמפיין|סקר(?:ים)?|מנדטים|אחוז החסימה|הצבעה|בוחר(?:ים)?|רשימה לכנסת|כנסת.{0,8}(?:26|ה)|בחירות מקומיות|הרכבת הממשלה|הקמת ממשלה|משא ומתן קואליציוני|הסכם קואליציוני|מפלגת|פריימריז|יום הבוחר|מדגם הבחירות/.test(text);
 }
 
 function cleanSpeech(text) {
@@ -111,7 +117,7 @@ export default async function handler(req, res) {
   }
 
   if (choice === "2" || action === "2" || action === "sources") {
-    const sourcesText = "מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה, סרוגים, מעריב וישראל היום.";
+    const sourcesText = "מקורות החדשות הם ynet, כאן חדשות, כל רגע, וואלה כולל פוליטיקה ומבזקים, סרוגים, מעריב, ישראל היום, Google News ו-Jerusalem Post.";
     return res.status(200).send(formatMenu(sourcesText));
   }
 
@@ -130,7 +136,7 @@ export default async function handler(req, res) {
   let items = feeds.flat().filter(isElectionRelated);
   const seen = new Set();
   items = items.filter(item => {
-    const key = item.link || item.title;
+    const key = item.title.toLocaleLowerCase("he").replace(/[״"'׳.,:;!?()\[\]{}]/g, "").replace(/\s+/g, " ").trim();
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
