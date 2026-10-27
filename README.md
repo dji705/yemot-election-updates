@@ -8,8 +8,8 @@ Import this repository into Vercel. The project uses Node.js 18+ and has no npm 
 
 ## Endpoints
 
-- `/api/yemot` — Hebrew welcome/menu message.
-- `/api/yemot?action=latest` — reads the latest election-related headlines.
+- `/api/yemot` — interactive Hebrew menu: press 1 for latest election headlines, 2 for sources, or 0 to finish. After options 1 and 2, the menu is played again.
+- `/api/yemot?action=latest` — reads the latest election-related headlines directly (for browser testing).
 - `/api/yemot?action=list&limit=10` — reads up to 10 headlines.
 - `/api/yemot?action=item&n=1` — reads one item from the current feed results.
 - `/api/yemot?action=sources` — describes the news sources.
@@ -19,9 +19,10 @@ Import this repository into Vercel. The project uses Node.js 18+ and has no npm 
 
 ```ini
 type=api
-api_link=https://YOUR-PROJECT.vercel.app/api/yemot?action=latest
+api_link=https://YOUR-PROJECT.vercel.app/api/yemot
 say_api_answer=yes
 api_url_post=no
+api_end_goto=/7
 ```
 
 Replace `YOUR-PROJECT` with the Vercel deployment name. Verify the response format with a test call before connecting the line.
