@@ -32,25 +32,3 @@ Replace `YOUR-PROJECT` with the Vercel deployment name. Verify the response form
 The source list is in `api/yemot.js`: ynet breaking and general news, כאן חדשות, כל רגע, וואלה general/politics/breaking, סרוגים, מעריב, ישראל היום, Google News election search, and the Jerusalem Post 2026 election feed. The parser supports RSS and Atom-style entries, normalizes duplicate headlines across feeds, and filters Hebrew and English election-related terms. RSS feed formats and availability can change; a source that fails or times out is skipped so other feeds can still contribute. The Central Elections Committee site is not treated as an RSS feed.
 
 This is a headline reader, not an official election-results service. Verify official results and announcements at the Central Elections Committee website.
-
-## Run as a standalone Node.js server
-
-This repository can run as a persistent Node.js HTTP server as well as a Vercel function.
-
-1. Install Node.js 18 or newer.
-2. Run `npm install`.
-3. Run `npm start`.
-4. Configure Yemot to call `https://YOUR-HOST/api/yemot` (your server must be reachable over HTTPS from Yemot).
-
-Set `PORT` to the port provided by your hosting platform; the default is `3000`. A health check is available at `/health`.
-
-For Yemot, use:
-```ini
-type=api
-api_link=https://YOUR-HOST/api/yemot
-say_api_answer=yes
-api_url_post=no
-api_end_goto=/8
-```
-
-The server must be hosted on a machine or service that stays running and has outbound internet access for RSS feeds. Do not use `localhost` as the public `api_link`.
