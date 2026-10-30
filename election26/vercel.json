@@ -1,0 +1,3 @@
+{
+  "functions": { "api/election26.js": { "maxDuration": 10 } }
+}
