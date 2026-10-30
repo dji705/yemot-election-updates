@@ -1,0 +1,7 @@
+{
+  "name": "election26-yemot-ivr",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" }
+}
