@@ -1,7 +1,9 @@
 {
   "functions": {
-    "api/yemot.js": {
-      "maxDuration": 10
+    "api/yemot.js": { "maxDuration": 10 },
+    "api/election26.js": {
+      "maxDuration": 10,
+      "includeFiles": "election26/data/*.b64"
     }
   }
 }
