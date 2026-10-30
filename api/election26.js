@@ -120,6 +120,12 @@ export default async function handler(req, res) {
   try {
     const { towns, stations, partyFields } = loadData();
     const q = req.query || {};
+    const action = String(q.action || "").toLowerCase();
+    if (action === "health") return res.status(200).send("OK: " + towns.length + " towns, " + stations.length + " polling stations");
+    if (action === "json") {
+      res.setHeader("Content-Type", "application/json; charset=utf-8");
+      return res.status(200).json({ towns: towns.length, pollingStations: stations.length, partyCodes: partyFields, sourceElection: 24, verifiedAsKnesset26: false });
+    }
     const input = findInput(q);
     if (!input) return res.status(200).send(menuHome());
     const key = input.value;
