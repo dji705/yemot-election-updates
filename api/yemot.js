@@ -113,10 +113,18 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "GET") return res.status(405).send(formatRead("השירות תומך בבקשת GET בלבד"));
 
-  const query = req.query || {};
-  const action = String(query.action || "").toLowerCase();
-  const choice = String(query.CHOICE ?? query.choice ?? "").trim();
-  const ext = String(query.ApiExtension || "");
+  const requestUrl = new URL(req.url, "https://example.invalid");
+  const query = Object.fromEntries(requestUrl.searchParams.entries());
+  const action = String(requestUrl.searchParams.get("action") || "").toLowerCase();
+  // Read the keypad selection directly from the raw URL, matching the working reference project.
+  const choice = String(
+    requestUrl.searchParams.get("CHOICE") ??
+    requestUrl.searchParams.get("choice") ??
+    requestUrl.searchParams.get("Digits") ??
+    requestUrl.searchParams.get("digits") ??
+    ""
+  ).trim();
+  const ext = String(requestUrl.searchParams.get("ApiExtension") || "");
   const returnFolder = /^(?:[0-9]+)(?:\/[0-9]+)*$/.test(ext) ? "/" + ext : "/8";
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
