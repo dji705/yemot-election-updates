@@ -82,7 +82,14 @@ function isElectionRelated(item) {
 }
 
 function cleanSpeech(text) {
-  return String(text || "").replace(/[\r\n]/g, " ").replace(/#/g, "").replace(/\s+/g, " ").trim();
+  // Yemot uses periods as segment separators, so spoken text must not contain them.
+  return String(text || "")
+    .replace(/[\r\n]/g, " ")
+    .replace(/#/g, "")
+    .replace(/[.。．]/g, ",")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/,+/g, ",");
 }
 
 function formatRead(text) {
