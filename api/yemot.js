@@ -101,7 +101,7 @@ function formatMenu(text = "ברוכים הבאים לעדכוני בחירות.
   // Accept only the three menu keys: 0, 1, 2.
   return "read=t-" + cleanSpeech(
     text + " להקראת המבזקים האחרונים הקישו אחת. לשמיעת מקורות החדשות הקישו שתיים. לחזרה לשלוחה הקודמת הקישו אפס."
-  ) + "=wm_nav,,1,1,7,Digits,no,no,,,1,Ok";
+  ) + "=CHOICE,,1,1,8,NO,yes,no,,012,,,,,no";
 }
 
 export default async function handler(req, res) {
@@ -115,12 +115,14 @@ export default async function handler(req, res) {
 
   const query = req.query || {};
   const action = String(query.action || "").toLowerCase();
-  const choice = String(query.wm_nav ?? query.WM_NAV ?? query.CHOICE ?? query.choice ?? query.Digits ?? query.digits ?? "").trim();
+  const choice = String(query.CHOICE ?? query.choice ?? "").trim();
+  const ext = String(query.ApiExtension || "");
+  const returnFolder = /^(?:[0-9]+)(?:\/[0-9]+)*$/.test(ext) ? "/" + ext : "/8";
   const limit = Math.min(MAX_ITEMS, Math.max(1, Number.parseInt(query.limit || "10", 10) || 10));
 
   // The read prompt sends the next key back to this endpoint as CHOICE.
   if (choice === "0" || action === "0" || action === "exit" || action === "hangup") {
-    return res.status(200).send("go_to_folder=/8");
+    return res.status(200).send("go_to_folder=" + returnFolder);
   }
 
   if (choice === "2" || action === "2" || action === "sources") {
